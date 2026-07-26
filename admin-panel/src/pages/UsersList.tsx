@@ -17,15 +17,20 @@ export default function UsersList() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    axios.get(`${API_BASE}/users`)
-      .then(res => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('adminToken')
+        const res = await axios.get(`${API_BASE}/users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
         setUsers(res.data)
+      } catch (err) {
+        console.error('Failed to fetch users', err)
+      } finally {
         setLoading(false)
-      })
-      .catch(err => {
-        console.error(err)
-        setLoading(false)
-      })
+      }
+    }
+    fetchUsers()
   }, [])
 
   return (

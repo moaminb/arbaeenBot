@@ -1,10 +1,16 @@
-# Use Python 3.9 slim image as the base
-FROM python:3.9-slim
+# Stage 1: Build the React frontend
+FROM node:18-alpine AS frontend-builder
+WORKDIR /app/admin-panel
+COPY admin-panel/package*.json ./
+RUN npm install
+COPY admin-panel/ ./
+RUN npm run build
 
-# Set working directory
+# Stage 2: Build the FastAPI backend
+FROM python:3.9-slim
 WORKDIR /app
 
-# Install system dependencies (required for some Python packages)
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libffi-dev \
@@ -12,13 +18,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements or directly install dependencies
-# We install dependencies first to leverage Docker cache
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire project
+# Copy the backend code
 COPY . .
+
+# Copy the built React frontend from Stage 1
+COPY --from=frontend-builder /app/admin-panel/dist /app/admin-panel/dist
 
 # Expose port 8000 for FastAPI
 EXPOSE 8000

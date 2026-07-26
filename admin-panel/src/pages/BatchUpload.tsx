@@ -45,8 +45,12 @@ export default function BatchUpload() {
     })
 
     try {
+      const token = localStorage.getItem('adminToken')
       const res = await axios.post('/api/upload_batch', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       })
       setStatus({ loading: false, message: res.data.message, error: false })
       setPhotos([])

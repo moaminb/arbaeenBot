@@ -37,8 +37,12 @@ export default function ManualUpload() {
     })
 
     try {
+      const token = localStorage.getItem('adminToken')
       await axios.post('/api/upload_manual', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       })
       setStatus({ loading: false, message: 'عکس‌ها با موفقیت ذخیره شدند!', error: false })
       setFiles([])
