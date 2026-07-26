@@ -15,6 +15,12 @@ if not TOKEN:
     print("Error: TELEGRAM_BOT_TOKEN not found in .env file.")
     exit(1)
 
+from telebot import apihelper
+
+if os.getenv("TELEGRAM_API_URL"):
+    # Change the base URL for Telegram API
+    apihelper.API_URL = os.getenv("TELEGRAM_API_URL") + "/bot{0}/{1}"
+
 bot = telebot.TeleBot(TOKEN)
 
 if not os.path.exists(PHOTOS_DIR):
