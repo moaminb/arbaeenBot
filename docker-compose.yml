@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  bot_server:
+    build: .
+    container_name: instabot_server
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./bot_database.db:/app/bot_database.db
+      - ./photos:/app/photos
+    env_file:
+      - .env
