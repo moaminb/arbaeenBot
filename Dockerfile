@@ -1,12 +1,3 @@
-# Stage 1: Build the React frontend
-FROM node:18-alpine AS frontend-builder
-WORKDIR /app/admin-panel
-COPY admin-panel/package*.json ./
-RUN npm install
-COPY admin-panel/ ./
-RUN npm run build
-
-# Stage 2: Build the FastAPI backend
 FROM python:3.9-slim
 WORKDIR /app
 
@@ -22,11 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend code
+# Copy the backend code and pre-built frontend
 COPY . .
-
-# Copy the built React frontend from Stage 1
-COPY --from=frontend-builder /app/admin-panel/dist /app/admin-panel/dist
 
 # Expose port 8000 for FastAPI
 EXPOSE 8000
