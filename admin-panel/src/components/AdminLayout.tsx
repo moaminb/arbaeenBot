@@ -13,10 +13,14 @@ export default function AdminLayout() {
   };
 
   const token = localStorage.getItem('adminToken');
-  if (!token) {
-    React.useEffect(() => {
+
+  React.useEffect(() => {
+    if (!token) {
       navigate('/admin/login');
-    }, [navigate]);
+    }
+  }, [token, navigate]);
+
+  if (!token) {
     return null;
   }
 
