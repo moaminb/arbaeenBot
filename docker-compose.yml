@@ -6,7 +6,7 @@ services:
     container_name: instabot_server
     restart: always
     ports:
-      - "80:8000"
+      - "8000:8000"
     volumes:
       - ./bot_database.db:/app/bot_database.db
       - ./photos:/app/photos
