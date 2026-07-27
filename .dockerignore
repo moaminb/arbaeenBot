@@ -4,7 +4,6 @@ __pycache__/
 bot_database.db
 photos/
 admin-panel/node_modules/
-admin-panel/dist/
 .DS_Store
 .env
 .git
