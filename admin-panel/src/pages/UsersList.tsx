@@ -19,6 +19,7 @@ export default function UsersList() {
   const [loading, setLoading] = useState(true)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [editFormData, setEditFormData] = useState<Partial<User>>({})
+  const [phoneError, setPhoneError] = useState('')
   const [saving, setSaving] = useState(false)
 
   const fetchUsers = async () => {
@@ -47,10 +48,15 @@ export default function UsersList() {
   const handleCloseModal = () => {
     setEditingUser(null)
     setEditFormData({})
+    setPhoneError('')
   }
 
   const handleSave = async () => {
     if (!editingUser) return
+    if (editFormData.phone_number && !/^[0-9]+$/.test(editFormData.phone_number)) {
+      setPhoneError('لطفا شماره موبایل را فقط با اعداد انگلیسی وارد کنید.')
+      return
+    }
     setSaving(true)
     try {
       const token = localStorage.getItem('adminToken')
@@ -171,9 +177,18 @@ export default function UsersList() {
                   type="text" 
                   dir="ltr"
                   value={editFormData.phone_number || ''} 
-                  onChange={e => setEditFormData({...editFormData, phone_number: e.target.value})}
-                  className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-red-500 focus:outline-none text-left"
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val && !/^[0-9]*$/.test(val)) {
+                      setPhoneError('فقط اعداد انگلیسی مجاز است.')
+                    } else {
+                      setPhoneError('')
+                    }
+                    setEditFormData({...editFormData, phone_number: val})
+                  }}
+                  className={`w-full bg-black/40 border ${phoneError ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-2 text-white focus:outline-none`}
                 />
+                {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">زبان</label>

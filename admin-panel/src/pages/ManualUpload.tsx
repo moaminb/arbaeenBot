@@ -28,6 +28,11 @@ export default function ManualUpload() {
       return
     }
 
+    if (!/^[0-9]+$/.test(phone)) {
+      setStatus({ loading: false, message: 'لطفا شماره موبایل را فقط با اعداد انگلیسی وارد کنید.', error: true })
+      return
+    }
+
     setStatus({ loading: true, message: '', error: false })
     
     const formData = new FormData()
@@ -63,7 +68,15 @@ export default function ManualUpload() {
           <input 
             type="text" 
             value={phone}
-            onChange={e => setPhone(e.target.value)}
+            onChange={e => {
+              const val = e.target.value;
+              if (val && !/^[0-9]*$/.test(val)) {
+                setStatus({ loading: false, message: 'فقط اعداد انگلیسی مجاز است.', error: true })
+              } else {
+                setStatus({ loading: false, message: '', error: false })
+              }
+              setPhone(val)
+            }}
             placeholder="مثال: 09123456789"
             className="w-full bg-black/20 text-gray-100 px-4 py-3 rounded-xl border border-white/10 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10 transition-all text-left placeholder-gray-600 outline-none"
             dir="ltr"
