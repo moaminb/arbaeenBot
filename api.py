@@ -131,6 +131,7 @@ async def upload_batch(excel_file: UploadFile = File(...), photos: List[UploadFi
 
 def run_bot():
     print("Telegram Bot is starting in background...")
+    bot.remove_webhook()
     bot.infinity_polling()
 
 @app.get("/api/stats")
