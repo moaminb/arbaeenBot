@@ -35,7 +35,8 @@ def init_db():
                   name TEXT,
                   profession TEXT,
                   contribution TEXT,
-                  phone_number TEXT)''')
+                  phone_number TEXT,
+                  has_received_photo INTEGER DEFAULT 0)''')
     conn.commit()
     conn.close()
 
@@ -242,6 +243,7 @@ def process_phone_number(message, phone_number):
             with open(photo_path, 'rb') as photo:
                 caption = get_string(user_id, 'photo_caption', phone=phone_number)
                 bot.send_photo(message.chat.id, photo, caption=caption)
+                update_user_db(user_id, 'has_received_photo', 1)
         except Exception as e:
             print(f"Error sending photo: {e}")
             send_and_track(message.chat.id, "Error sending photo.")

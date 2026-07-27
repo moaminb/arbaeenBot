@@ -29,6 +29,7 @@ class User(BaseModel):
     profession: Optional[str]
     contribution: Optional[str]
     phone_number: Optional[str]
+    has_received_photo: Optional[int] = 0
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin_secret_123")
 
@@ -59,6 +60,19 @@ def get_users(_ = Depends(verify_admin)):
     rows = c.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+@app.put("/api/users/{user_id}")
+def update_user(user_id: int, user: User, _ = Depends(verify_admin)):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("""
+        UPDATE users 
+        SET language=?, name=?, profession=?, contribution=?, phone_number=?, has_received_photo=? 
+        WHERE user_id=?
+    """, (user.language, user.name, user.profession, user.contribution, user.phone_number, user.has_received_photo, user_id))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
 
 @app.post("/api/upload_manual")
 async def upload_manual(phone_number: str = Form(...), files: List[UploadFile] = File(...), _ = Depends(verify_admin)):
@@ -176,10 +190,62 @@ def get_user_photos(phone: str, request: Request):
             
     return {"photos": photos}
 
+@app.get("/api/admin/photos")
+def get_admin_photos(request: Request, _ = Depends(verify_admin)):
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT phone_number, has_received_photo FROM users WHERE phone_number IS NOT NULL")
+    users = c.fetchall()
+    conn.close()
+    
+    # Map phone to status
+    user_status = {}
+    for row in users:
+        p = row['phone_number']
+        if p:
+            user_status[p] = row['has_received_photo']
+            
+    if not os.path.exists(PHOTOS_DIR):
+        return {"items": []}
+        
+    items = []
+    base_url = str(request.base_url).rstrip("/")
+    
+    # Group photos by phone number
+    phone_photos = {}
+    for f in os.listdir(PHOTOS_DIR):
+        if f.endswith('.jpg'):
+            # Extract phone from filename (e.g., 09123456789.jpg or 09123456789_2.jpg)
+            phone_part = f.split('_')[0].replace('.jpg', '')
+            if phone_part not in phone_photos:
+                phone_photos[phone_part] = []
+            phone_photos[phone_part].append(f"{base_url}/photos/{f}")
+            
+    for phone, urls in phone_photos.items():
+        items.append({
+            "phone_number": phone,
+            "has_received_photo": user_status.get(phone, 0),
+            "photos": urls
+        })
+        
+    return {"items": items}
+
 @app.on_event("startup")
 def startup_event():
     if not os.path.exists(PHOTOS_DIR):
         os.makedirs(PHOTOS_DIR)
+        
+    # Migration for has_received_photo
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("ALTER TABLE users ADD COLUMN has_received_photo INTEGER DEFAULT 0")
+        conn.commit()
+        conn.close()
+        print("Migration: Added has_received_photo column.")
+    except sqlite3.OperationalError:
+        pass # Column already exists
     
     # Start bot in a background thread
     thread = threading.Thread(target=run_bot, daemon=True)

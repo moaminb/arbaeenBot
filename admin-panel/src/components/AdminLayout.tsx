@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Users, Upload, FileSpreadsheet, LayoutDashboard, LogOut } from 'lucide-react'
+import { Users, Upload, FileSpreadsheet, LayoutDashboard, LogOut, Image as ImageIcon } from 'lucide-react'
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -42,6 +42,13 @@ export default function AdminLayout() {
           >
             <Users size={20} />
             <span className="font-medium">لیست کاربران</span>
+          </Link>
+          <Link 
+            to="/admin/gallery" 
+            className={`flex items-center space-x-2 space-x-reverse px-4 py-3 rounded-xl transition-all duration-300 ${isActive('/admin/gallery') ? 'bg-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'text-gray-400 hover:bg-red-500/10 hover:text-red-400'}`}
+          >
+            <ImageIcon size={20} />
+            <span className="font-medium">گالری تصاویر</span>
           </Link>
           <Link 
             to="/admin/manual" 

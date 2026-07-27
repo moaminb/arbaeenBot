@@ -7,6 +7,7 @@ import UsersList from './pages/UsersList'
 import ManualUpload from './pages/ManualUpload'
 import BatchUpload from './pages/BatchUpload'
 import UserPortal from './pages/UserPortal'
+import PhotoGallery from './pages/PhotoGallery'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="users" element={<UsersList />} />
           <Route path="manual" element={<ManualUpload />} />
           <Route path="batch" element={<BatchUpload />} />
+          <Route path="gallery" element={<PhotoGallery />} />
         </Route>
       </Routes>
     </Router>
