@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Users, Upload, FileSpreadsheet, LayoutDashboard, LogOut, Image as ImageIcon, Menu, X } from 'lucide-react'
 
@@ -31,7 +31,7 @@ export default function AdminLayout() {
       {/* Mobile Header */}
       <div className="md:hidden glass-panel border-b border-white/5 p-4 flex justify-between items-center z-50 relative sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full object-cover border border-white/10" />
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full object-cover border border-white/10" />
           <h1 className="text-xl font-black tracking-tight text-gradient">پنل مدیریت</h1>
         </div>
         <button 
@@ -59,7 +59,7 @@ export default function AdminLayout() {
       `}>
         <div className="p-6 border-b border-white/5 hidden md:block">
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full object-cover border border-white/10" />
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-full object-cover border border-white/10" />
             <h1 className="text-2xl font-black tracking-tight text-gradient">پنل مدیریت</h1>
           </div>
         </div>
