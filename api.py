@@ -231,6 +231,14 @@ def get_admin_photos(request: Request, _ = Depends(verify_admin)):
         
     return {"items": items}
 
+@app.delete("/api/admin/photos/{filename}")
+def delete_photo(filename: str, _ = Depends(verify_admin)):
+    file_path = os.path.join(PHOTOS_DIR, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return {"status": "success", "message": "Photo deleted"}
+    raise HTTPException(status_code=404, detail="File not found")
+
 @app.on_event("startup")
 def startup_event():
     if not os.path.exists(PHOTOS_DIR):

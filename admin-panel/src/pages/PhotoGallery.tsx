@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Filter } from "lucide-react";
+import { Filter, Trash2 } from "lucide-react";
 
 interface PhotoItem {
   phone_number: string;
@@ -38,6 +38,25 @@ export default function PhotoGallery() {
     if (filter === "not_received") return item.has_received_photo === 0;
     return true;
   });
+
+  const handleDeletePhoto = async (photoUrl: string) => {
+    if (!window.confirm("آیا از حذف این عکس مطمئن هستید؟ این عملیات غیرقابل بازگشت است.")) return;
+    
+    // Extract filename from URL
+    const parts = photoUrl.split("/");
+    const filename = parts[parts.length - 1];
+
+    try {
+      await axios.delete(`/api/admin/photos/${filename}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Refresh list
+      fetchPhotos();
+    } catch (err) {
+      console.error(err);
+      alert("خطا در حذف عکس.");
+    }
+  };
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden min-h-[calc(100vh-8rem)]">
@@ -82,8 +101,17 @@ export default function PhotoGallery() {
                       alt={`Photo ${item.phone_number}`} 
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleDeletePhoto(item.photos[0])}
+                        className="bg-red-600/80 hover:bg-red-500 text-white p-2 rounded-full backdrop-blur-sm transition-colors"
+                        title="حذف این عکس"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
                     {item.photos.length > 1 && (
-                      <span className="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs px-2 py-1 rounded-lg border border-white/10">
+                      <span className="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs px-2 py-1 rounded-lg border border-white/10 z-10">
                         +{item.photos.length - 1} عکس
                       </span>
                     )}
