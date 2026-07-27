@@ -10,5 +10,6 @@ services:
     volumes:
       - ./bot_database.db:/app/bot_database.db
       - ./photos:/app/photos
+      - ./admin-panel/dist:/app/admin-panel/dist
     env_file:
       - .env
