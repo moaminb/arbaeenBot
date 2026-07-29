@@ -235,16 +235,26 @@ def process_phone_step(message):
 
 def process_phone_number(message, phone_number):
     user_id = message.from_user.id
-    photo_path = os.path.join(PHOTOS_DIR, f"{phone_number}.jpg")
     
     delete_previous_bot_message(message.chat.id)
     
-    if os.path.exists(photo_path):
+    # Find all photos matching phone_number.jpg or phone_number_*.jpg
+    matching_photos = []
+    if os.path.exists(PHOTOS_DIR):
+        for f in os.listdir(PHOTOS_DIR):
+            if f == f"{phone_number}.jpg" or f.startswith(f"{phone_number}_"):
+                matching_photos.append(os.path.join(PHOTOS_DIR, f))
+                
+    # Sort them to send in order
+    matching_photos.sort()
+    
+    if matching_photos:
         try:
-            with open(photo_path, 'rb') as photo:
-                caption = get_string(user_id, 'photo_caption', phone=phone_number)
-                bot.send_photo(message.chat.id, photo, caption=caption)
-                update_user_db(user_id, 'has_received_photo', 1)
+            for photo_path in matching_photos:
+                with open(photo_path, 'rb') as photo:
+                    caption = get_string(user_id, 'photo_caption', phone=phone_number)
+                    bot.send_photo(message.chat.id, photo, caption=caption)
+            update_user_db(user_id, 'has_received_photo', 1)
         except Exception as e:
             print(f"Error sending photo: {e}")
             send_and_track(message.chat.id, "Error sending photo.")
