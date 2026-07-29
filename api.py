@@ -333,6 +333,17 @@ def startup_event():
     thread = threading.Thread(target=run_bot, daemon=True)
     thread.start()
     
+    from bale_bot import bot as b_bot
+    def run_bale_bot():
+        print("Bale Bot is starting in background...")
+        try:
+            b_bot.polling(none_stop=True)
+        except Exception as e:
+            print(f"Bale Bot error: {e}")
+
+    bale_thread = threading.Thread(target=run_bale_bot, daemon=True)
+    bale_thread.start()
+    
 # Mount photos directory directly so users can view/download
 app.mount("/photos", StaticFiles(directory=PHOTOS_DIR), name="photos")
 
