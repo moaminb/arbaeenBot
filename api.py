@@ -78,8 +78,8 @@ def update_user(user_id: int, user: User, _ = Depends(verify_admin)):
 async def upload_manual(phone_number: str = Form(...), files: List[UploadFile] = File(...), _ = Depends(verify_admin)):
     # Clean phone number
     phone = phone_number.replace(" ", "").replace("-", "")
-    if not phone.startswith('+'):
-        phone = '+' + phone
+    if not phone.startswith('+') or not phone[1:].isdigit():
+        raise HTTPException(status_code=400, detail="شماره موبایل باید با فرمت کد کشور وارد شود (مثلاً +989123456789)")
     
     # Check existing photos for this number to append
     existing_files = [f for f in os.listdir(PHOTOS_DIR) if f.startswith(f"{phone}_") or f == f"{phone}.jpg"]
@@ -122,8 +122,8 @@ async def upload_batch(excel_file: UploadFile = File(...), photos: List[UploadFi
             if p.replace('.','',1).isdigit():
                 p = str(int(float(p)))
             p = p.replace(" ", "").replace("-", "")
-            if not p.startswith('+'):
-                p = '+' + p
+            if not p.startswith('+') or not p[1:].isdigit():
+                raise HTTPException(status_code=400, detail=f"فرمت شماره موبایل نامعتبر است: {p}. باید همراه با کد کشور باشد (مثال: +989123456789)")
             clean_phones.append(p)
             
         # Sort photos alphabetically by filename to maintain order
