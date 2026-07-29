@@ -289,10 +289,45 @@ def startup_event():
         c = conn.cursor()
         c.execute("ALTER TABLE users ADD COLUMN has_received_photo INTEGER DEFAULT 0")
         conn.commit()
-        conn.close()
-        print("Migration: Added has_received_photo column.")
     except sqlite3.OperationalError:
         pass # Column already exists
+        
+    # Migration for created_at
+    try:
+        c.execute("SELECT created_at FROM users LIMIT 1")
+    except sqlite3.OperationalError:
+        print("Migrating database to add created_at column...")
+        c.execute("ALTER TABLE users RENAME TO users_old")
+        c.execute('''CREATE TABLE users
+                     (user_id INTEGER PRIMARY KEY,
+                      language TEXT,
+                      name TEXT,
+                      profession TEXT,
+                      contribution TEXT,
+                      phone_number TEXT,
+                      has_received_photo INTEGER DEFAULT 0,
+                      created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+        
+        # Determine columns that actually existed in users_old to avoid errors if some are missing
+        c.execute("PRAGMA table_info(users_old)")
+        columns = [row[1] for row in c.fetchall()]
+        
+        # Build the INSERT statement dynamically based on available columns
+        target_cols = []
+        select_cols = []
+        for col in ["user_id", "language", "name", "profession", "contribution", "phone_number", "has_received_photo"]:
+            if col in columns:
+                target_cols.append(col)
+                select_cols.append(col)
+                
+        target_str = ", ".join(target_cols)
+        select_str = ", ".join(select_cols)
+        
+        c.execute(f"INSERT INTO users ({target_str}) SELECT {select_str} FROM users_old")
+        c.execute("DROP TABLE users_old")
+        conn.commit()
+    finally:
+        conn.close()
     
     # Start bots in a background thread
     thread = threading.Thread(target=run_bot, daemon=True)
