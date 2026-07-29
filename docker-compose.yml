@@ -13,3 +13,14 @@ services:
       - ./admin-panel/dist:/app/admin-panel/dist
     env_file:
       - .env
+
+  bale_bot:
+    build: .
+    container_name: bale_bot_server
+    restart: always
+    command: python bale_bot.py
+    volumes:
+      - ./bot_database.db:/app/bot_database.db
+      - ./photos:/app/photos
+    env_file:
+      - .env
