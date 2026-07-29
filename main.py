@@ -65,7 +65,7 @@ STRINGS = {
         'ask_contribution': "بسیار عالی. لطفاً بفرمایید چه کمک‌ها یا خدماتی می‌توانید به جبهه اسلام ارائه دهید؟",
         'ask_phone': "از توضیحات شما سپاسگزاریم.\nاکنون لطفاً جهت دریافت تصویر، شماره تلفن همراه خود را وارد نمایید:",
         'ask_phone_skipped': "لطفاً جهت دریافت تصویر، شماره تلفن همراه خود را وارد نمایید:",
-        'invalid_phone': "شماره تلفن وارد شده معتبر نمی‌باشد. لطفاً مجدداً تلاش فرمایید (مثال: 09123456789):",
+        'invalid_phone': "شماره تلفن وارد شده معتبر نمی‌باشد. لطفاً مجدداً تلاش فرمایید (مثال: +989123456789):",
         'photo_caption': "تصویر مربوط به شماره {phone}",
         'not_found': "متأسفانه تصویری برای این شماره یافت نشد، و یا شماره وارد شده اشتباه است.",
         'fallback': "جهت شروع مجدد لطفاً دستور /start را ارسال نمایید.",
@@ -80,7 +80,7 @@ STRINGS = {
         'ask_contribution': "Excellent. Please let us know how you can contribute or provide services to the Islamic Front:",
         'ask_phone': "We appreciate your responses.\nNow, please enter your mobile phone number to receive your photo:",
         'ask_phone_skipped': "Please enter your mobile phone number to receive your photo:",
-        'invalid_phone': "The phone number entered is invalid. Please try again (e.g., 09123456789):",
+        'invalid_phone': "The phone number entered is invalid. Please try again (e.g., +989123456789):",
         'photo_caption': "Photo for number {phone}",
         'not_found': "Unfortunately, no photo was found for this number, or the number is incorrect.",
         'fallback': "To restart, please send the /start command.",
@@ -95,7 +95,7 @@ STRINGS = {
         'ask_contribution': "ممتاز. يرجى إعلامنا كيف يمكنك المساهمة أو تقديم الخدمات للجبهة الإسلامية:",
         'ask_phone': "نقدر إجاباتك.\nالآن، يرجى إدخال رقم هاتفك المحمول لاستلام صورتك:",
         'ask_phone_skipped': "يرجى إدخال رقم هاتفك المحمول لاستلام صورتك:",
-        'invalid_phone': "رقم الهاتف المدخل غير صالح. يرجى المح المحاولة مرة أخرى:",
+        'invalid_phone': "رقم الهاتف المدخل غير صالح. يرجى المح المحاولة مرة أخرى (مثال: +989123456789):",
         'photo_caption': "الصورة الخاصة بالرقم {phone}",
         'not_found': "عذراً، لم يتم العثور على صورة لهذا الرقم، أو أن الرقم غير صحيح.",
         'fallback': "لإعادة البدء، يرجى إرسال أمر /start.",
@@ -142,10 +142,10 @@ def send_and_track(chat_id, text, reply_markup=None):
 def extract_phone_number(text):
     if not text:
         return None
-    pattern = r'(?:(?:\+|00)98|0)?(9\d{9})'
+    pattern = r'^\+(\d+)$'
     match = re.search(pattern, text.replace(" ", "").replace("-", ""))
     if match:
-        return "0" + match.group(1)
+        return "+" + match.group(1)
     return None
 
 def trigger_start(message):

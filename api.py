@@ -78,6 +78,8 @@ def update_user(user_id: int, user: User, _ = Depends(verify_admin)):
 async def upload_manual(phone_number: str = Form(...), files: List[UploadFile] = File(...), _ = Depends(verify_admin)):
     # Clean phone number
     phone = phone_number.replace(" ", "").replace("-", "")
+    if not phone.startswith('+'):
+        phone = '+' + phone
     
     # Check existing photos for this number to append
     existing_files = [f for f in os.listdir(PHOTOS_DIR) if f.startswith(f"{phone}_") or f == f"{phone}.jpg"]
@@ -120,9 +122,8 @@ async def upload_batch(excel_file: UploadFile = File(...), photos: List[UploadFi
             if p.replace('.','',1).isdigit():
                 p = str(int(float(p)))
             p = p.replace(" ", "").replace("-", "")
-            if p.startswith("98"): p = "0" + p[2:]
-            elif p.startswith("+98"): p = "0" + p[3:]
-            elif not p.startswith("0") and len(p) == 10: p = "0" + p
+            if not p.startswith('+'):
+                p = '+' + p
             clean_phones.append(p)
             
         # Sort photos alphabetically by filename to maintain order
@@ -175,9 +176,8 @@ def get_stats(_ = Depends(verify_admin)):
 @app.get("/api/user/photos/{phone}")
 def get_user_photos(phone: str, request: Request):
     clean_phone = phone.replace(" ", "").replace("-", "")
-    if clean_phone.startswith("+98"): clean_phone = "0" + clean_phone[3:]
-    elif clean_phone.startswith("98"): clean_phone = "0" + clean_phone[2:]
-    elif not clean_phone.startswith("0") and len(clean_phone) == 10: clean_phone = "0" + clean_phone
+    if not clean_phone.startswith("+"):
+        clean_phone = "+" + clean_phone
         
     if not os.path.exists(PHOTOS_DIR):
         return {"photos": []}

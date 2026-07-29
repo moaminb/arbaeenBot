@@ -53,8 +53,8 @@ export default function UsersList() {
 
   const handleSave = async () => {
     if (!editingUser) return
-    if (editFormData.phone_number && !/^[0-9]+$/.test(editFormData.phone_number)) {
-      setPhoneError('لطفا شماره موبایل را فقط با اعداد انگلیسی وارد کنید.')
+    if (editFormData.phone_number && !/^\+[0-9]+$/.test(editFormData.phone_number)) {
+      setPhoneError('شماره موبایل باید با فرمت کد کشور وارد شود (مثال: +989123456789)')
       return
     }
     setSaving(true)
@@ -179,8 +179,8 @@ export default function UsersList() {
                   value={editFormData.phone_number || ''} 
                   onChange={e => {
                     const val = e.target.value;
-                    if (val && !/^[0-9]*$/.test(val)) {
-                      setPhoneError('فقط اعداد انگلیسی مجاز است.')
+                    if (val && !/^\+?[0-9]*$/.test(val)) {
+                      setPhoneError('فقط اعداد انگلیسی و علامت + مجاز است')
                     } else {
                       setPhoneError('')
                     }

@@ -13,8 +13,8 @@ export default function UserPortal() {
     e.preventDefault()
     if (!phone) return
 
-    if (!/^[0-9]+$/.test(phone)) {
-      setError('لطفا شماره موبایل را فقط با اعداد انگلیسی وارد کنید.')
+    if (!/^\+[0-9]+$/.test(phone)) {
+      setError('لطفا شماره موبایل را همراه با کد کشور (مثلا +98) و فقط با اعداد انگلیسی وارد کنید.')
       return
     }
 
@@ -72,14 +72,14 @@ export default function UserPortal() {
                 value={phone}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val && !/^[0-9]*$/.test(val)) {
-                    setError('لطفا شماره موبایل را فقط با اعداد انگلیسی وارد کنید.')
+                  if (val && !/^\+?[0-9]*$/.test(val)) {
+                    setError('لطفا شماره موبایل را همراه با کد کشور (مثلا +98) و فقط با اعداد انگلیسی وارد کنید.')
                   } else {
                     setError('')
                   }
                   setPhone(val)
                 }}
-                placeholder="مثال: 09123456789"
+                placeholder="مثال: 989123456789+"
                 className="w-full bg-black/40 text-gray-100 px-6 py-4 rounded-2xl border border-white/10 focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10 transition-all outline-none text-left font-medium text-lg placeholder-gray-600"
                 dir="ltr"
               />
