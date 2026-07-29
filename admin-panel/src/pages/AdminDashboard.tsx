@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Users, Image as ImageIcon, HardDrive } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+interface HistoricalData {
+  date: string;
+  users: number;
+  photos: number;
+  storage_mb: number;
+}
 
 interface Stats {
   total_users: number
   total_photos: number
   storage_size_mb: number
+  historical_data: HistoricalData[]
 }
 
 export default function AdminDashboard() {
@@ -40,11 +48,9 @@ export default function AdminDashboard() {
     return <div className="text-red-400">{error}</div>
   }
 
-  const chartData = [
-    { name: 'کاربران', value: stats.total_users, color: '#ef4444' },
-    { name: 'عکس‌ها', value: stats.total_photos, color: '#f87171' },
-    { name: 'حجم (MB)', value: stats.storage_size_mb, color: '#fca5a5' },
-  ]
+  const chartData = stats.historical_data && stats.historical_data.length > 0 
+    ? stats.historical_data 
+    : [{ date: 'امروز', users: stats.total_users, photos: stats.total_photos, storage_mb: stats.storage_size_mb }];
 
   return (
     <div className="space-y-8">
@@ -86,27 +92,90 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="glass-card rounded-2xl p-6">
-        <h3 className="text-lg font-medium text-gray-200 mb-6">نمودار کلی سیستم</h3>
-        <div className="h-80 w-full" dir="ltr">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-              <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
-              <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
-              <Tooltip 
-                cursor={{ fill: '#ffffff05' }}
-                contentStyle={{ backgroundColor: '#111111', border: '1px solid #ffffff10', borderRadius: '12px', color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
-              />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Users Chart */}
+        <div className="glass-card rounded-2xl p-6">
+          <h3 className="text-lg font-medium text-gray-200 mb-6 flex items-center gap-2">
+            <Users size={18} className="text-red-500" />
+            روند رشد کاربران
+          </h3>
+          <div className="h-64 w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                <XAxis dataKey="date" stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#111111', border: '1px solid #ffffff10', borderRadius: '12px', color: '#fff' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="users" name="تعداد کاربران" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Photos Chart */}
+        <div className="glass-card rounded-2xl p-6">
+          <h3 className="text-lg font-medium text-gray-200 mb-6 flex items-center gap-2">
+            <ImageIcon size={18} className="text-red-400" />
+            روند رشد عکس‌ها
+          </h3>
+          <div className="h-64 w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorPhotos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f87171" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f87171" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                <XAxis dataKey="date" stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#111111', border: '1px solid #ffffff10', borderRadius: '12px', color: '#fff' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="photos" name="تعداد عکس‌ها" stroke="#f87171" strokeWidth={3} fillOpacity={1} fill="url(#colorPhotos)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Storage Chart */}
+        <div className="glass-card rounded-2xl p-6 lg:col-span-2">
+          <h3 className="text-lg font-medium text-gray-200 mb-6 flex items-center gap-2">
+            <HardDrive size={18} className="text-red-300" />
+            روند رشد حجم ذخیره سازی (MB)
+          </h3>
+          <div className="h-64 w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorStorage" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#fca5a5" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#fca5a5" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                <XAxis dataKey="date" stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#111111', border: '1px solid #ffffff10', borderRadius: '12px', color: '#fff' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="storage_mb" name="حجم (مگابایت)" stroke="#fca5a5" strokeWidth={3} fillOpacity={1} fill="url(#colorStorage)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>

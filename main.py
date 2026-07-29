@@ -36,7 +36,8 @@ def init_db():
                   profession TEXT,
                   contribution TEXT,
                   phone_number TEXT,
-                  has_received_photo INTEGER DEFAULT 0)''')
+                  has_received_photo INTEGER DEFAULT 0,
+                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     conn.commit()
     conn.close()
 

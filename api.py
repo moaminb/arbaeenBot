@@ -151,27 +151,65 @@ def run_bot():
 
 @app.get("/api/stats")
 def get_stats(_ = Depends(verify_admin)):
+    import datetime
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM users")
     total_users = c.fetchone()[0]
     
-    # get active users (last 7 days, pseudo since we don't have created_at, just mock for now or return total)
-    # Since DB doesn't have dates, we just use total
+    # Get users grouped by date (YYYY-MM-DD)
+    c.execute("SELECT DATE(created_at), COUNT(*) FROM users GROUP BY DATE(created_at) ORDER BY DATE(created_at)")
+    users_by_date = {row[0]: row[1] for row in c.fetchall() if row[0]}
     conn.close()
 
     total_photos = 0
     total_size_bytes = 0
+    photos_by_date = {}
+    storage_by_date = {}
+    
     if os.path.exists(PHOTOS_DIR):
         files = [f for f in os.listdir(PHOTOS_DIR) if f.endswith('.jpg')]
         total_photos = len(files)
         total_size_bytes = sum(os.path.getsize(os.path.join(PHOTOS_DIR, f)) for f in files)
+        
+        # Group by file modification time
+        for f in files:
+            filepath = os.path.join(PHOTOS_DIR, f)
+            mtime = os.path.getmtime(filepath)
+            date_str = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d')
+            size = os.path.getsize(filepath)
+            
+            photos_by_date[date_str] = photos_by_date.get(date_str, 0) + 1
+            storage_by_date[date_str] = storage_by_date.get(date_str, 0) + size
+            
+    # Merge dates to create a unified timeline
+    all_dates = set(users_by_date.keys()).union(set(photos_by_date.keys()))
+    sorted_dates = sorted(list(all_dates))
     
+    historical_data = []
+    cum_users = 0
+    cum_photos = 0
+    cum_storage = 0
+    
+    for date in sorted_dates:
+        cum_users += users_by_date.get(date, 0)
+        cum_photos += photos_by_date.get(date, 0)
+        cum_storage += storage_by_date.get(date, 0)
+        
+        historical_data.append({
+            "date": date,
+            "users": cum_users,
+            "photos": cum_photos,
+            "storage_mb": round(cum_storage / (1024 * 1024), 2)
+        })
+
     return {
         "total_users": total_users,
         "total_photos": total_photos,
-        "storage_size_mb": round(total_size_bytes / (1024 * 1024), 2)
+        "storage_size_mb": round(total_size_bytes / (1024 * 1024), 2),
+        "historical_data": historical_data
     }
+
 
 @app.get("/api/user/photos/{phone}")
 def get_user_photos(phone: str, request: Request):
