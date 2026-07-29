@@ -149,6 +149,12 @@ def run_bot():
     bot.remove_webhook()
     bot.infinity_polling()
 
+from bale_bot import bot as b_bot
+def run_bale_bot():
+    print("Bale Bot is starting in background...")
+    b_bot.remove_webhook()
+    b_bot.infinity_polling()
+
 @app.get("/api/stats")
 def get_stats(_ = Depends(verify_admin)):
     import datetime
@@ -293,9 +299,12 @@ def startup_event():
     except sqlite3.OperationalError:
         pass # Column already exists
     
-    # Start bot in a background thread
+    # Start bots in a background thread
     thread = threading.Thread(target=run_bot, daemon=True)
     thread.start()
+    
+    bale_thread = threading.Thread(target=run_bale_bot, daemon=True)
+    bale_thread.start()
 
 # Mount photos directory directly so users can view/download
 app.mount("/photos", StaticFiles(directory=PHOTOS_DIR), name="photos")
