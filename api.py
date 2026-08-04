@@ -22,6 +22,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import RedirectResponse
+
+@app.middleware("http")
+async def redirect_old_domain(request: Request, call_next):
+    if request.url.hostname == "ghesas.mo-tech.ir":
+        url = request.url.replace(hostname="ghesas.basij.site")
+        return RedirectResponse(url, status_code=301)
+    return await call_next(request)
+
 class User(BaseModel):
     user_id: int
     language: Optional[str]
